@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:src="@{ translateItem.isFavorite() ? @android:drawable/btn_star_big_on : @android:drawable/btn_star_big_off }" />
+            android:src="@{ translateItem.isFavorite() ? @android:drawable/star_big_on : @android:drawable/star_big_off }" />
 
         <LinearLayout
             android:orientation="vertical"
