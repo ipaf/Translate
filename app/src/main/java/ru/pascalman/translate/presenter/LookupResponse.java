@@ -6,12 +6,18 @@ import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class LookupResponse implements Serializable
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class LookupResponse extends RealmObject implements Serializable
 {
 
+    @PrimaryKey
+    private long id;
     private String text;
     private String pos;
     private List<String> syns = null;
+    private boolean isFavorite;
 
     /**
      * No args constructor for use in serialization
@@ -26,11 +32,21 @@ public class LookupResponse implements Serializable
      * @param pos
      * @param syns
      */
-    public LookupResponse(String text, String pos, List<String> syns) 
+    public LookupResponse(String text, String pos, List<String> syns)
 	{
         this.text = text;
         this.pos = pos;
         this.syns = syns;
+    }
+
+    public long getId()
+    {
+        return id;
+    }
+
+    public void setId(long id)
+    {
+        this.id = id;
     }
 
     public String getText() 
@@ -63,10 +79,20 @@ public class LookupResponse implements Serializable
         this.syns = syns;
     }
 
+    public boolean isFavorite()
+    {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean isFavorite)
+    {
+        this.isFavorite = isFavorite;
+    }
+
     @Override
     public int hashCode() 
 	{
-        return new HashCodeBuilder().append(text).append(pos).append(syns).toHashCode();
+        return new HashCodeBuilder().append(text).append(pos).append(syns).append(isFavorite).toHashCode();
     }
 
     @Override
@@ -80,7 +106,7 @@ public class LookupResponse implements Serializable
         
         LookupResponse rhs = ((LookupResponse) other);
 		
-        return new EqualsBuilder().append(text, rhs.text).append(pos, rhs.pos).append(syns, rhs.syns).isEquals();
+        return new EqualsBuilder().append(text, rhs.text).append(pos, rhs.pos).append(syns, rhs.syns).append(isFavorite, rhs.isFavorite).isEquals();
     }
 
 }
