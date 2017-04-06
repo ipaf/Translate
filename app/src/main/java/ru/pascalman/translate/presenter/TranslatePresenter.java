@@ -28,7 +28,7 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
     private Languages languages;
     private String translateFrom;
     private String translateTo;
-    private long lastId;
+    private LookupResponse lastLookupResponse;
 
     public TranslatePresenter(TranslateView view)
     {
@@ -108,7 +108,8 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
 
     private void translate(String translateText)
     {
-        Subscription translateSubscription = translateModel.translate(getTranslateDirection(), translateText)
+        String translateDirection = getTranslateDirection();
+        Subscription translateSubscription = translateModel.translate(translateDirection, translateText)
                 .map(translateResponseMapper)
                 .subscribe(new Observer<TranslateResponse>() {
 
@@ -130,7 +131,7 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
                                 .toBlocking()
                                 .first();
 
-                        lookup(translatedText);
+                        lookup(translateText, translateDirection, translatedText);
                     }
 
                 });
@@ -144,7 +145,7 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
         return translateFrom + "-" + translateTo;
     }
 
-    private void lookup(String translatedText)
+    private void lookup(String translateText, String translateDirection, String translatedText)
     {
         Subscription dictionarySubscription = dictionaryModel.lookup(getDictionaryDirection(), translatedText)
                 .map(lookupResponseMapper)
@@ -165,13 +166,16 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
                     public void onNext(LookupResponse lookupResponse)
                     {
                         Realm realm = Realm.getDefaultInstance();
-
-                        lastId = realm.where(LookupResponse.class).max("id").longValue() + 1;
+                        long lastId = realm.where(LookupResponse.class).max("id").longValue() + 1;
 
                         lookupResponse.setId(lastId);
-                        realm.copyToRealm(lookupResponse);
+                        lookupResponse.setOriginalText(translateText);
+                        lookupResponse.setTranslateDirection(translateDirection);
 
-                        view.showTranslatedText(lookupResponse.getText(), lookupResponse.getPos(), lookupResponse.getSyns());
+                        lastLookupResponse = realm.copyToRealm(lookupResponse);
+
+                        view.showTranslatedText(lookupResponse.getText(), lookupResponse.getPos());
+                        view.showList(lookupResponse.getSyns());
                     }
 
                 });
@@ -186,10 +190,7 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
 
     public void setTranslateFavorite(boolean isFavorite)
     {
-        Realm realm = Realm.getDefaultInstance();
-        LookupResponse lookupResponse = realm.where(LookupResponse.class).equalTo("id", lastId).findFirst();
-
-        lookupResponse.setFavorite(isFavorite);
+        lastLookupResponse.setFavorite(isFavorite);
     }
 
     @Override

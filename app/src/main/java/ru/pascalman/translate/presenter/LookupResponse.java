@@ -14,8 +14,10 @@ public class LookupResponse extends RealmObject implements Serializable
 
     @PrimaryKey
     private long id;
+    private String originalText;
     private String text;
     private String pos;
+    private String translateDirection;
     private List<String> syns = null;
     private boolean isFavorite;
 
@@ -27,7 +29,7 @@ public class LookupResponse extends RealmObject implements Serializable
 	{}
 
     /**
-     * 
+     *
      * @param text
      * @param pos
      * @param syns
@@ -49,6 +51,16 @@ public class LookupResponse extends RealmObject implements Serializable
         this.id = id;
     }
 
+    public String getOriginalText()
+    {
+        return originalText;
+    }
+
+    public void setOriginalText(String originalText)
+    {
+        this.originalText = originalText;
+    }
+
     public String getText() 
 	{
         return text;
@@ -67,6 +79,16 @@ public class LookupResponse extends RealmObject implements Serializable
     public void setPos(String pos) 
 	{
         this.pos = pos;
+    }
+
+    public String getTranslateDirection()
+    {
+        return translateDirection;
+    }
+
+    public void setTranslateDirection(String translateDirection)
+    {
+        this.translateDirection = translateDirection;
     }
 
     public List<String> getSyns() 
