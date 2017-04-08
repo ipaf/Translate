@@ -5,7 +5,9 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import io.realm.Realm;
 import ru.pascalman.translate.presenter.mappers.LanguagesMapper;
@@ -68,6 +70,7 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
                     translateFrom = defaultLanguages[0];
                     translateTo = defaultLanguages[1];
 
+                    view.initLanguages(new ArrayList<>(languages.getLangs().values()));
                     view.setDefaultLanguages(translateFrom, translateTo);
                 }
 
@@ -104,6 +107,45 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
             return;
 
         translate(translateText);
+    }
+
+    public void setTranslateFrom(String translateFrom)
+    {
+        String translateFromClean = getLangAcronimByFullName(translateFrom);
+
+        if (isAllowTranslateDirection(translateFromClean, translateTo))
+            this.translateFrom = translateFrom;
+        else
+            view.showError("Doesn't allow translate direction");
+    }
+
+    private String getLangAcronimByFullName(String fullName)
+    {
+        String langAcronim = "";
+        Map<String, String> langs = languages.getLangs();
+
+        for (String key : langs.keySet())
+            if (langs.get(key).equals(fullName))
+                langAcronim = key;
+
+        return langAcronim;
+    }
+
+    private boolean isAllowTranslateDirection(String translateFrom, String translateTo)
+    {
+        String translateDirection = translateFrom + "-" + translateTo;
+
+        return languages.getDirs().contains(translateDirection);
+    }
+
+    public void setTranslateTo(String translateTo)
+    {
+        String translateToClean = getLangAcronimByFullName(translateTo);
+
+        if (isAllowTranslateDirection(translateFrom, translateToClean))
+            this.translateTo = translateTo;
+        else
+            view.showError("Doesn't allow translate direction");
     }
 
     private void translate(String translateText)

@@ -4,19 +4,17 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import ru.pascalman.translate.R;
 import ru.pascalman.translate.databinding.SynListItemBinding;
-import ru.pascalman.translate.presenter.SynItem;
 
-public class SynAdapter extends BaseAdapter<SynItem, SynAdapter.SynViewHolder>
+public class SynAdapter extends BaseAdapter<String, SynAdapter.SynViewHolder>
 {
 
-    public SynAdapter(View.OnClickListener listener)
+    public SynAdapter()
     {
-        super(listener);
+        super(null);
     }
 
     @Override
@@ -32,9 +30,9 @@ public class SynAdapter extends BaseAdapter<SynItem, SynAdapter.SynViewHolder>
     @Override
     public void onBindViewHolder(SynViewHolder viewHolder, int i)
     {
-        SynItem synItem = list.get(i);
+        String text = list.get(i);
 
-        viewHolder.setSynItem(synItem);
+        viewHolder.setItem(i, text);
     }
 
     public class SynViewHolder extends RecyclerView.ViewHolder
@@ -49,9 +47,10 @@ public class SynAdapter extends BaseAdapter<SynItem, SynAdapter.SynViewHolder>
             this.binding = binding;
         }
 
-        public void setSynItem(SynItem item)
+        public void setItem(int index, String text)
         {
-            binding.setSynItem(item);
+            binding.setText(text);
+            binding.setIndex(index);
         }
 
     }

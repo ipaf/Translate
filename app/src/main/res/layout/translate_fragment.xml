@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="ru.pascalman.translate.view.TranslateFragment">
 
     <LinearLayout
         android:orientation="vertical"
@@ -16,23 +16,28 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="31dp">
 
-            <TextView
-                android:id="@+id/tvTranslateFrom"
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
             <Button
-                android:id="@+id/btnSwitchLanguages"
+                android:id="@+id/btnTranslateFrom"
+                android:background="@android:color/transparent"
+                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:onClick="onChangeLanguageClicked" />
+
+            <Button
+                android:id="@+id/btnSwapLanguages"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onSwapLanguagesClicked"
                 android:text="Swap" />
 
-            <TextView
-                android:id="@+id/tvTranslateTo"
+            <Button
+                android:id="@+id/btnTranslateTo"
+                android:background="@android:color/transparent"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:onClick="onChangeLanguageClicked" />
 
         </LinearLayout>
 
@@ -46,6 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
                 android:inputType="textMultiLine"
+                android:imeOptions="actionSearch"
                 android:paddingRight="36dp"
                 android:gravity="top|left"
                 android:hint="Input text to Translate" />
@@ -56,31 +62,52 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
+                android:onClick="onClearClicked"
                 android:background="@android:color/transparent"
                 android:src="@android:drawable/ic_menu_close_clear_cancel" />
 
         </RelativeLayout>
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/llTranslateResult"
+            android:visibility="gone"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rvTranslates"
+            <TextView
+                android:id="@+id/tvTranslatedText"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="wrap_content" />
 
-            <ImageButton
-                android:id="@+id/btnFavorite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:background="@android:color/transparent"
-                android:src="@android:drawable/star_big_off" />
+            <TextView
+                android:id="@+id/tvPos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-        </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rvTranslates"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ImageButton
+                    android:id="@+id/btnFavorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:background="@android:color/transparent"
+                    android:src="@android:drawable/star_big_off"
+                    android:onClick="onTranslateFavoriteClicked" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</fragment>
+</layout>
