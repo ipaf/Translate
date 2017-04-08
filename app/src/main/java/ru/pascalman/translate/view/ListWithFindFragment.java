@@ -10,6 +10,7 @@ import android.view.View;
 
 import java.util.List;
 
+import ru.pascalman.translate.MainActivity;
 import ru.pascalman.translate.R;
 import ru.pascalman.translate.databinding.ListWithFindFragmentBinding;
 import ru.pascalman.translate.presenter.ListWithFindPresenter;
@@ -116,7 +117,7 @@ public class ListWithFindFragment extends Fragment implements ListWithFindView, 
     @Override
     public void onClick(View v)
     {
-        //TODO: open translate fragment and init him!
+        ((MainActivity)getActivity()).openTranslationWithResponseId(v.getId());
     }
 
     @Override

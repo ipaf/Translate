@@ -20,6 +20,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 {
 
     private MainBinding binding;
+    private ActionBar actionBar;
+    private AppSectionsPagerAdapter appSectionsPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -29,16 +31,16 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         Realm.init(this);
 
         binding = DataBindingUtil.setContentView(this, R.layout.main);
+        actionBar = getActionBar();
+        appSectionsPagerAdapter = new AppSectionsPagerAdapter(getSupportFragmentManager());
 
         ViewPager vpContent = binding.vpContent;
-        AppSectionsPagerAdapter mAppSectionsPagerAdapter = new AppSectionsPagerAdapter(getSupportFragmentManager());
-        ActionBar actionBar = getActionBar();
 
         actionBar.setHomeButtonEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        vpContent.setAdapter(mAppSectionsPagerAdapter);
-        vpContent.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        vpContent.setAdapter(appSectionsPagerAdapter);
+        vpContent.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
             @Override
             public void onPageSelected(int position)
@@ -48,9 +50,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         });
 
-        for (int i = 0; i < mAppSectionsPagerAdapter.getCount(); i++)
+        for (int i = 0; i < appSectionsPagerAdapter.getCount(); i++)
             actionBar.addTab(actionBar.newTab()
-                    .setText(mAppSectionsPagerAdapter.getPageTitle(i))
+                    .setText(appSectionsPagerAdapter.getPageTitle(i))
                     .setTabListener(this));
     }
 
@@ -68,10 +70,17 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction)
     {}
 
+    public void openTranslationWithResponseId(int id)
+    {
+        appSectionsPagerAdapter.setLookupResponseId(id);
+        actionBar.setSelectedNavigationItem(0);
+    }
+
     public static class AppSectionsPagerAdapter extends FragmentPagerAdapter
     {
 
         private String[] pageTitles;
+        private int lookupResponseId = -1;
 
         public AppSectionsPagerAdapter(FragmentManager fm)
         {
@@ -86,10 +95,22 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             switch (i)
             {
                 case 0:
-                    return new TranslateFragment();
-                default:
-                    Fragment fragment = new ListWithFindFragment();
+                    Fragment fragment = new TranslateFragment();
                     Bundle args = new Bundle();
+
+                    if (lookupResponseId > -1)
+                    {
+                        args.putInt("lookupResponseId", lookupResponseId);
+
+                        lookupResponseId = -1;
+                    }
+
+                    fragment.setArguments(args);
+
+                    return fragment;
+                default:
+                    fragment = new ListWithFindFragment();
+                    args = new Bundle();
 
                     args.putBoolean("isOnlyFavorite", i == 1);
                     fragment.setArguments(args);
@@ -108,6 +129,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         public CharSequence getPageTitle(int position)
         {
             return pageTitles[position];
+        }
+
+        public void setLookupResponseId(int lookupResponseId)
+        {
+            this.lookupResponseId = lookupResponseId;
         }
 
     }

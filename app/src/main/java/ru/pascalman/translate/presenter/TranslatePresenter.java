@@ -31,6 +31,7 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
     private String translateFrom;
     private String translateTo;
     private LookupResponse lastLookupResponse;
+    private int lookupResposeIdForShow = -1;
 
     public TranslatePresenter(TranslateView view)
     {
@@ -65,18 +66,38 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
                 {
                     TranslatePresenter.this.languages = languages;
 
-                    String[] defaultLanguages = getDefaultLanguages();
-
-                    translateFrom = defaultLanguages[0];
-                    translateTo = defaultLanguages[1];
-
                     view.initLanguages(new ArrayList<>(languages.getLangs().values()));
-                    view.setDefaultLanguages(translateFrom, translateTo);
+
+                    if (lookupResposeIdForShow > -1)
+                        showLookupResponseById(lookupResposeIdForShow);
+                    else
+                    {
+                        String[] defaultLanguages = getDefaultLanguages();
+
+                        translateFrom = defaultLanguages[0];
+                        translateTo = defaultLanguages[1];
+                    }
+
+                    view.setChoiceLanguages(translateFrom, translateTo);
                 }
 
             });
 
         addSubscription(subscription);
+    }
+
+    private void showLookupResponseById(int id)
+    {
+        Realm realm = Realm.getDefaultInstance();
+
+        lastLookupResponse = realm.where(LookupResponse.class).equalTo("id", id).findFirst();
+        translateFrom = languages.getLangs().get(lastLookupResponse.getTranslateDirection().substring(0, 1));
+        translateTo = languages.getLangs().get(lastLookupResponse.getTranslateDirection().substring(3, 4));
+
+        view.showOriginalText(lastLookupResponse.getOriginalText());
+        view.showTranslatedText(lastLookupResponse.getText(), lastLookupResponse.getPos());
+        view.setTranslateFavorite(lastLookupResponse.isFavorite());
+        view.showList(lastLookupResponse.getSyns());
     }
 
     private String[] getDefaultLanguages()
@@ -233,6 +254,14 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
     public void setTranslateFavorite(boolean isFavorite)
     {
         lastLookupResponse.setFavorite(isFavorite);
+    }
+
+    public void openLookupResponseById(int id)
+    {
+        if (languages != null)
+            showLookupResponseById(id);
+        else
+            lookupResposeIdForShow = id;
     }
 
     @Override

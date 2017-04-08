@@ -1,6 +1,7 @@
 package ru.pascalman.translate.view;
 
 import android.databinding.DataBindingUtil;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -44,6 +45,11 @@ public class TranslateFragment extends Fragment implements TranslateView
         binding.rvTranslates.setAdapter(adapter);
         binding.etTranslateText.setOnEditorActionListener(presenter);
 
+        int lookupResponseId = getArguments().getInt("lookupResponseId");
+
+        if (lookupResponseId > -1)
+            presenter.openLookupResponseById(lookupResponseId);
+
         return binding.getRoot();
     }
 
@@ -73,10 +79,23 @@ public class TranslateFragment extends Fragment implements TranslateView
     }
 
     @Override
-    public void setDefaultLanguages(String translateFrom, String translateTo)
+    public void setChoiceLanguages(String translateFrom, String translateTo)
     {
         binding.btnTranslateFrom.setText(translateFrom);
         binding.btnTranslateTo.setText(translateTo);
+    }
+
+    @Override
+    public void setTranslateFavorite(boolean isFavorite)
+    {
+        Drawable favoriteDrawable;
+
+        if (isFavorite)
+            favoriteDrawable = getResources().getDrawable(android.R.drawable.star_big_on);
+        else
+            favoriteDrawable = getResources().getDrawable(android.R.drawable.star_big_off);
+
+        binding.btnFavorite.setImageDrawable(favoriteDrawable);
     }
 
     @Override
@@ -114,6 +133,12 @@ public class TranslateFragment extends Fragment implements TranslateView
     public void showError(String error)
     {
         makeToast(error);
+    }
+
+    @Override
+    public void showOriginalText(String originalText)
+    {
+        binding.etTranslateText.setText(originalText);
     }
 
     public void onClearClicked(View view)
@@ -161,11 +186,7 @@ public class TranslateFragment extends Fragment implements TranslateView
         boolean isFavorite = imageButton.getDrawable().equals(getResources().getDrawable(android.R.drawable.star_big_on));
         boolean isNeedFavorite = !isFavorite;
 
-        if (isNeedFavorite)
-            imageButton.setImageDrawable(getResources().getDrawable(android.R.drawable.star_big_on));
-        else
-            imageButton.setImageDrawable(getResources().getDrawable(android.R.drawable.star_big_off));
-
+        setTranslateFavorite(isNeedFavorite);
         presenter.setTranslateFavorite(isNeedFavorite);
     }
 
