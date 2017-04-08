@@ -208,7 +208,7 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
                     public void onNext(LookupResponse lookupResponse)
                     {
                         Realm realm = Realm.getDefaultInstance();
-                        long lastId = realm.where(LookupResponse.class).max("id").longValue() + 1;
+                        int lastId = realm.where(LookupResponse.class).max("id").intValue() + 1;
 
                         lookupResponse.setId(lastId);
                         lookupResponse.setOriginalText(translateText);

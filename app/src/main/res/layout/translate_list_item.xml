@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
-        <variable name="translateItem" type="ru.pascalman.translate.presenter.TranslateItem"/>
+        <variable name="lookupResponse" type="ru.pascalman.translate.presenter.LookupResponse"/>
     </data>
 
     <LinearLayout
@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:src="@{ translateItem.isFavorite() ? @android:drawable/star_big_on : @android:drawable/star_big_off }" />
+            android:src="@{ lookupResponse.isFavorite() ? @android:drawable/star_big_on : @android:drawable/star_big_off }" />
 
         <LinearLayout
             android:orientation="vertical"
@@ -28,13 +28,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
-                android:text="@{ translateItem.getOriginalText() }" />
+                android:text="@{ lookupResponse.getOriginalText() }" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
-                android:text="@{ translateItem.getTranslatedText() }" />
+                android:text="@{ lookupResponse.getTranslatedText() }" />
 
         </LinearLayout>
 
@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="@{ translateItem.getTranslateDirection() }" />
+            android:text="@{ lookupResponse.getTranslateDirection() }" />
 
     </LinearLayout>
 

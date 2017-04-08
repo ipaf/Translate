@@ -9,14 +9,18 @@ import android.view.ViewGroup;
 
 import ru.pascalman.translate.R;
 import ru.pascalman.translate.databinding.TranslateListItemBinding;
-import ru.pascalman.translate.presenter.TranslateItem;
+import ru.pascalman.translate.presenter.LookupResponse;
 
-public class TranslateAdapter extends BaseAdapter<TranslateItem, TranslateAdapter.TranslateViewHolder>
+public class TranslateAdapter extends BaseAdapter<LookupResponse, TranslateAdapter.TranslateViewHolder>
 {
 
-    public TranslateAdapter(View.OnClickListener listener)
+    private View.OnLongClickListener longClickListener;
+
+    public TranslateAdapter(View.OnClickListener listener, View.OnLongClickListener longClickListener)
     {
         super(listener);
+
+        this.longClickListener = longClickListener;
     }
 
     @Override
@@ -25,6 +29,10 @@ public class TranslateAdapter extends BaseAdapter<TranslateItem, TranslateAdapte
         Context context = viewGroup.getContext();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         TranslateListItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.translate_list_item, viewGroup, false);
+        View bindingRoot = binding.getRoot();
+
+        bindingRoot.setOnClickListener(listener);
+        bindingRoot.setOnLongClickListener(longClickListener);
 
         return new TranslateViewHolder(binding);
     }
@@ -32,9 +40,9 @@ public class TranslateAdapter extends BaseAdapter<TranslateItem, TranslateAdapte
     @Override
     public void onBindViewHolder(TranslateViewHolder viewHolder, int i)
     {
-        TranslateItem translateItem = list.get(i);
+        LookupResponse lookupResponse = list.get(i);
 
-        viewHolder.setTranslateItem(translateItem);
+        viewHolder.setLookupResponse(lookupResponse);
     }
 
     public class TranslateViewHolder extends RecyclerView.ViewHolder
@@ -49,9 +57,10 @@ public class TranslateAdapter extends BaseAdapter<TranslateItem, TranslateAdapte
             this.binding = binding;
         }
 
-        public void setTranslateItem(TranslateItem item)
+        public void setLookupResponse(LookupResponse lookupResponse)
         {
-            binding.setTranslateItem(item);
+            binding.setLookupResponse(lookupResponse);
+            binding.getRoot().setId(lookupResponse.getId());
         }
 
     }

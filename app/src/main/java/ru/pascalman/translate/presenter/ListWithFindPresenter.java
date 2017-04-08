@@ -19,6 +19,7 @@ public class ListWithFindPresenter extends BasePresenter implements TextView.OnE
 {
 
     private ListWithFindView view;
+    private boolean isOnlyFavorite;
     private List<LookupResponse> responses;
 
     public TextWatcher textWatcher = new TextWatcher() {
@@ -42,6 +43,7 @@ public class ListWithFindPresenter extends BasePresenter implements TextView.OnE
     public ListWithFindPresenter(ListWithFindView view, boolean isOnlyFavorite)
     {
         this.view = view;
+        this.isOnlyFavorite = isOnlyFavorite;
 
         init(isOnlyFavorite);
     }
@@ -86,6 +88,33 @@ public class ListWithFindPresenter extends BasePresenter implements TextView.OnE
 
         if (findResult.size() > 0)
             view.showList(findResult);
+        else
+            view.showError("Nothing is found");
+    }
+
+    public void clearResponses()
+    {
+        Realm realm = Realm.getDefaultInstance();
+
+        if (isOnlyFavorite)
+            realm.where(LookupResponse.class).equalTo("isFavorite", true).findAll().deleteAllFromRealm();
+        else
+            realm.delete(LookupResponse.class);
+
+        responses.clear();
+        view.showList(responses);
+    }
+
+    public void removeResponseById(int id)
+    {
+        Realm realm = Realm.getDefaultInstance();
+        LookupResponse response = realm.where(LookupResponse.class).equalTo("id", id).findFirst();
+
+        responses.remove(response);
+        response.deleteFromRealm();
+
+        if (responses.size() > 0)
+            view.showList(responses);
         else
             view.showEmptyList();
     }

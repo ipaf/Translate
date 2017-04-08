@@ -13,7 +13,7 @@ public class LookupResponse extends RealmObject implements Serializable
 {
 
     @PrimaryKey
-    private long id;
+    private int id;
     private String originalText;
     private String text;
     private String pos;
@@ -41,12 +41,12 @@ public class LookupResponse extends RealmObject implements Serializable
         this.syns = syns;
     }
 
-    public long getId()
+    public int getId()
     {
         return id;
     }
 
-    public void setId(long id)
+    public void setId(int id)
     {
         this.id = id;
     }
