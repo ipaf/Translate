@@ -98,7 +98,12 @@ public class ListWithFindFragment extends Fragment implements ListWithFindView, 
         {
             case R.id.action_search:
                 if (binding.rlSearchBar.getVisibility() == View.VISIBLE)
+                {
+                    binding.etFind.getText().clear();
+                    presenter.showAllResponses();
                     binding.rlSearchBar.setVisibility(View.GONE);
+                    ((MainActivity)getActivity()).hideSoftKeyboard();
+                }
                 else
                     binding.rlSearchBar.setVisibility(View.VISIBLE);
                 break;

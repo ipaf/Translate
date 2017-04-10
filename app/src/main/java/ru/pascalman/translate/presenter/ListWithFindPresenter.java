@@ -93,6 +93,11 @@ public class ListWithFindPresenter extends BasePresenter implements TextView.OnE
             view.showError("Nothing is found");
     }
 
+    public void showAllResponses()
+    {
+        view.showList(responses);
+    }
+
     public void clearResponses()
     {
         Realm realm = Realm.getDefaultInstance();

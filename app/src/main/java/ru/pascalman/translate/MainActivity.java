@@ -1,5 +1,6 @@
 package ru.pascalman.translate;
 
+import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -9,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.inputmethod.InputMethodManager;
 
 import io.realm.Realm;
 
@@ -74,6 +76,13 @@ public class MainActivity extends AppCompatActivity implements ActionBar.TabList
     {
         appSectionsPagerAdapter.setLookupResponseById(id);
         actionBar.setSelectedNavigationItem(0);
+    }
+
+    public void hideSoftKeyboard()
+    {
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+
+        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
 
     public static class AppSectionsPagerAdapter extends FragmentPagerAdapter

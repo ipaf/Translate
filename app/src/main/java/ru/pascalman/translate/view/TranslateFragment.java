@@ -1,6 +1,5 @@
 package ru.pascalman.translate.view;
 
-import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -11,13 +10,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.*;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.List;
 
+import ru.pascalman.translate.MainActivity;
 import ru.pascalman.translate.R;
 import ru.pascalman.translate.databinding.TranslateFragmentBinding;
 import ru.pascalman.translate.presenter.Syn;
@@ -234,17 +233,10 @@ public class TranslateFragment extends Fragment implements TranslateView, View.O
         if (actionId == EditorInfo.IME_ACTION_SEARCH)
         {
             presenter.onSearchButtonClick();
-            hideSoftKeyboard();
+            ((MainActivity)getActivity()).hideSoftKeyboard();
         }
 
         return actionId == EditorInfo.IME_ACTION_SEARCH;
-    }
-
-    private void hideSoftKeyboard()
-    {
-        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
-
-        inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
     }
 
     public void setLookupResponseById(int lookupResponseId)
