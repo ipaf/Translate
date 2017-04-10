@@ -2,7 +2,9 @@ package ru.pascalman.translate.view;
 
 import java.util.List;
 
-public interface TranslateView extends ListView<String>
+import ru.pascalman.translate.presenter.Syn;
+
+public interface TranslateView extends ListView<Syn>
 {
 
     void setChoiceLanguages(String translateFrom, String translateTo);

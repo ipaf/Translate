@@ -36,4 +36,10 @@ public abstract class BaseAdapter<T1, T2 extends RecyclerView.ViewHolder> extend
         return list;
     }
 
+    public void clearList()
+    {
+        list.clear();
+        notifyDataSetChanged();
+    }
+
 }

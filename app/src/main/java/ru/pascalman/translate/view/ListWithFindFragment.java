@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.*;
 import android.view.View;
 
@@ -20,6 +21,7 @@ import ru.pascalman.translate.view.adapters.TranslateAdapter;
 public class ListWithFindFragment extends Fragment implements ListWithFindView, View.OnClickListener, View.OnLongClickListener
 {
 
+    private boolean isOnlyFavorite;
     private String type;
     private ListWithFindFragmentBinding binding;
     private TranslateAdapter adapter;
@@ -33,34 +35,54 @@ public class ListWithFindFragment extends Fragment implements ListWithFindView, 
     {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        boolean isOnlyFavorite = getArguments().getBoolean("isOnlyFavorite");
-
+        isOnlyFavorite = getArguments().getBoolean("isOnlyFavorite");
         type = isOnlyFavorite ? "Favorite" : "History";
         binding = DataBindingUtil.inflate(inflater, R.layout.list_with_find_fragment,container, false);
         adapter = new TranslateAdapter(this, this);
-        presenter = new ListWithFindPresenter(this, isOnlyFavorite);
         removeResponseDialog = new AlertDialog.Builder(getContext())
                 .setTitle("Remove search result")
                 .setMessage("Do you want to remove search result?")
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> presenter.removeResponseById(idLongClickedResponse))
-                .setNegativeButton(android.R.string.cancel, ((dialog, which) -> dialog.dismiss()))
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss())
                 .create();
         clearResponses = new AlertDialog.Builder(getContext())
                 .setTitle("Clear " + type)
                 .setMessage("Do you really want to clear " + type + "?")
-                .setPositiveButton(android.R.string.yes, ((dialog, which) -> {
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
                     presenter.clearResponses();
                     binding.rlSearchBar.setVisibility(View.GONE);
-                }))
-                .setNegativeButton(android.R.string.cancel, ((dialog, which) -> dialog.dismiss()))
+                })
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss())
                 .create();
 
-        binding.etFind.addTextChangedListener(presenter.textWatcher);
-        binding.etFind.setOnEditorActionListener(presenter);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+
+        binding.rvItems.setLayoutManager(layoutManager);
+        binding.rvItems.setAdapter(adapter);
 
         setHasOptionsMenu(true);
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState)
+    {
+        super.onViewCreated(view, savedInstanceState);
+
+        presenter = new ListWithFindPresenter(this, isOnlyFavorite);
+
+        binding.etFind.addTextChangedListener(presenter.textWatcher);
+        binding.etFind.setOnEditorActionListener(presenter);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser)
+    {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (isVisibleToUser)
+            presenter.init();
     }
 
     @Override
@@ -75,7 +97,10 @@ public class ListWithFindFragment extends Fragment implements ListWithFindView, 
         switch (item.getItemId())
         {
             case R.id.action_search:
-                binding.rlSearchBar.setVisibility(View.VISIBLE);
+                if (binding.rlSearchBar.getVisibility() == View.VISIBLE)
+                    binding.rlSearchBar.setVisibility(View.GONE);
+                else
+                    binding.rlSearchBar.setVisibility(View.VISIBLE);
                 break;
             case R.id.action_clear:
                 clearResponses.show();
@@ -100,6 +125,7 @@ public class ListWithFindFragment extends Fragment implements ListWithFindView, 
     @Override
     public void showEmptyList()
     {
+        adapter.clearList();
         makeToast(type + " is empty");
     }
 

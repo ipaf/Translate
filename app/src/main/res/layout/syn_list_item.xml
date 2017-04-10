@@ -3,31 +3,46 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
-        <variable name="index" type="int" />
-        <variable name="text" type="String"/>
+        <variable name="index" type="String" />
+        <variable name="syn" type="ru.pascalman.translate.presenter.Syn" />
     </data>
     
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
     
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{ index }" />
+            android:text="@{ index }"
+            android:layout_gravity="center_vertical" />
     
         <TextView
             android:text="@string/dot"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    
-        <TextView
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="10dp" />
+
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@{ text }" />
-    
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{ syn.getText() }" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{ syn.getPos() }" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </layout>

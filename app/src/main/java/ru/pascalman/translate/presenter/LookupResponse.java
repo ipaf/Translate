@@ -1,11 +1,11 @@
 package ru.pascalman.translate.presenter;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -17,8 +17,10 @@ public class LookupResponse extends RealmObject implements Serializable
     private String originalText;
     private String text;
     private String pos;
+    private String translateFrom;
+    private String translateTo;
     private String translateDirection;
-    private List<String> syns = null;
+    private RealmList<Syn> syns = null;
     private boolean isFavorite;
 
     /**
@@ -34,7 +36,7 @@ public class LookupResponse extends RealmObject implements Serializable
      * @param pos
      * @param syns
      */
-    public LookupResponse(String text, String pos, List<String> syns)
+    public LookupResponse(String text, String pos, RealmList<Syn> syns)
 	{
         this.text = text;
         this.pos = pos;
@@ -81,6 +83,26 @@ public class LookupResponse extends RealmObject implements Serializable
         this.pos = pos;
     }
 
+    public String getTranslateFrom()
+    {
+        return translateFrom;
+    }
+
+    public void setTranslateFrom(String translateFrom)
+    {
+        this.translateFrom = translateFrom;
+    }
+
+    public String getTranslateTo()
+    {
+        return translateTo;
+    }
+
+    public void setTranslateTo(String translateTo)
+    {
+        this.translateTo = translateTo;
+    }
+
     public String getTranslateDirection()
     {
         return translateDirection;
@@ -91,12 +113,12 @@ public class LookupResponse extends RealmObject implements Serializable
         this.translateDirection = translateDirection;
     }
 
-    public List<String> getSyns() 
+    public RealmList<Syn> getSyns()
 	{
         return syns;
     }
 
-    public void setSyns(List<String> syns) 
+    public void setSyns(RealmList<Syn> syns)
 	{
         this.syns = syns;
     }
@@ -114,7 +136,17 @@ public class LookupResponse extends RealmObject implements Serializable
     @Override
     public int hashCode() 
 	{
-        return new HashCodeBuilder().append(text).append(pos).append(syns).append(isFavorite).toHashCode();
+        return new HashCodeBuilder()
+                .append(id)
+                .append(originalText)
+                .append(text)
+                .append(pos)
+                .append(translateFrom)
+                .append(translateTo)
+                .append(translateDirection)
+                .append(syns)
+                .append(isFavorite)
+                .toHashCode();
     }
 
     @Override
@@ -128,7 +160,17 @@ public class LookupResponse extends RealmObject implements Serializable
         
         LookupResponse rhs = ((LookupResponse) other);
 		
-        return new EqualsBuilder().append(text, rhs.text).append(pos, rhs.pos).append(syns, rhs.syns).append(isFavorite, rhs.isFavorite).isEquals();
+        return new EqualsBuilder()
+                .append(id, rhs.id)
+                .append(originalText, rhs.originalText)
+                .append(text, rhs.text)
+                .append(pos, rhs.pos)
+                .append(translateFrom, rhs.translateFrom)
+                .append(translateTo, rhs.translateTo)
+                .append(translateDirection, rhs.translateDirection)
+                .append(syns, rhs.syns)
+                .append(isFavorite, rhs.isFavorite)
+                .isEquals();
     }
 
 }

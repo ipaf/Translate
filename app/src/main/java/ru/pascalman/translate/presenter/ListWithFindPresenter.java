@@ -44,11 +44,9 @@ public class ListWithFindPresenter extends BasePresenter implements TextView.OnE
     {
         this.view = view;
         this.isOnlyFavorite = isOnlyFavorite;
-
-        init(isOnlyFavorite);
     }
 
-    private void init(boolean isOnlyFavorite)
+    public void init()
     {
         Realm realm = Realm.getDefaultInstance();
         RealmResults<LookupResponse> realmResults = realm.where(LookupResponse.class).findAll();
@@ -56,7 +54,10 @@ public class ListWithFindPresenter extends BasePresenter implements TextView.OnE
         if (isOnlyFavorite)
             realmResults = realmResults.where().equalTo("isFavorite", true).findAll();
 
-        responses = realmResults;
+        responses = Observable.from(realmResults)
+                .toList()
+                .toBlocking()
+                .first();
 
         if (responses.size() > 0)
             view.showList(responses);
@@ -96,13 +97,19 @@ public class ListWithFindPresenter extends BasePresenter implements TextView.OnE
     {
         Realm realm = Realm.getDefaultInstance();
 
+        realm.beginTransaction();
+
         if (isOnlyFavorite)
-            realm.where(LookupResponse.class).equalTo("isFavorite", true).findAll().deleteAllFromRealm();
+            for (LookupResponse lookupResponse : realm.where(LookupResponse.class).equalTo("isFavorite", true).findAll())
+                lookupResponse.setFavorite(false);
         else
             realm.delete(LookupResponse.class);
 
+        realm.commitTransaction();
+
         responses.clear();
         view.showList(responses);
+        view.showError((isOnlyFavorite ? "Favorite" : "History") + " cleared");
     }
 
     public void removeResponseById(int id)
@@ -110,8 +117,21 @@ public class ListWithFindPresenter extends BasePresenter implements TextView.OnE
         Realm realm = Realm.getDefaultInstance();
         LookupResponse response = realm.where(LookupResponse.class).equalTo("id", id).findFirst();
 
-        responses.remove(response);
+        for (int i = responses.size() - 1; i >= 0; i--)
+        {
+            LookupResponse responseForDelete = responses.get(i);
+
+            if (responseForDelete.getId() == id)
+            {
+                responses.remove(responseForDelete);
+
+                break;
+            }
+        }
+
+        realm.beginTransaction();
         response.deleteFromRealm();
+        realm.commitTransaction();
 
         if (responses.size() > 0)
             view.showList(responses);

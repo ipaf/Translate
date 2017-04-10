@@ -1,5 +1,6 @@
 package ru.pascalman.translate.view;
 
+import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -7,21 +8,23 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.*;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.TextView;
 
 import java.util.List;
 
 import ru.pascalman.translate.R;
 import ru.pascalman.translate.databinding.TranslateFragmentBinding;
+import ru.pascalman.translate.presenter.Syn;
 import ru.pascalman.translate.presenter.TranslatePresenter;
 import ru.pascalman.translate.view.adapters.SynAdapter;
 
-public class TranslateFragment extends Fragment implements TranslateView
+public class TranslateFragment extends Fragment implements TranslateView, View.OnClickListener, TextView.OnEditorActionListener
 {
 
     private TranslateFragmentBinding binding;
@@ -29,6 +32,7 @@ public class TranslateFragment extends Fragment implements TranslateView
     private SynAdapter adapter;
     private boolean isTranslateFromDialogOpened;
     private AlertDialog changeLanguageDialog;
+    private int lookupResponseId = -1;
 
     @Override
     public android.view.View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -37,20 +41,46 @@ public class TranslateFragment extends Fragment implements TranslateView
 
         binding = DataBindingUtil.inflate(inflater, R.layout.translate_fragment, container, false);
         adapter = new SynAdapter();
-        presenter = new TranslatePresenter(this);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(container.getContext());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
 
         binding.rvTranslates.setLayoutManager(layoutManager);
         binding.rvTranslates.setAdapter(adapter);
-        binding.etTranslateText.setOnEditorActionListener(presenter);
 
-        int lookupResponseId = getArguments().getInt("lookupResponseId");
+        binding.btnTranslateFrom.setOnClickListener(this);
+        binding.btnSwapLanguages.setOnClickListener(this);
+        binding.btnTranslateTo.setOnClickListener(this);
+        binding.btnClearTranslateText.setOnClickListener(this);
+        binding.btnFavorite.setOnClickListener(this);
 
-        if (lookupResponseId > -1)
-            presenter.openLookupResponseById(lookupResponseId);
+        binding.etTranslateText.setOnEditorActionListener(this);
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState)
+    {
+        super.onViewCreated(view, savedInstanceState);
+
+        presenter = new TranslatePresenter(this);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser)
+    {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (!isVisibleToUser || presenter == null)
+            return;
+
+        if (lookupResponseId > -1)
+        {
+            presenter.showLookupResponseById(lookupResponseId);
+
+            lookupResponseId = -1;
+        } else
+            presenter.updateTranslateFavorite();
     }
 
     @Override
@@ -73,6 +103,8 @@ public class TranslateFragment extends Fragment implements TranslateView
                         presenter.setTranslateTo(choiceLanguage);
                         binding.btnTranslateTo.setText(choiceLanguage);
                     }
+
+                    dialog.dismiss();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .create();
@@ -109,11 +141,11 @@ public class TranslateFragment extends Fragment implements TranslateView
     {
         binding.tvTranslatedText.setText(translatedText);
         binding.tvPos.setText(pos);
-        binding.llTranslateResult.setVisibility(View.VISIBLE);
+        binding.rlTranslateResult.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void showList(List<String> list)
+    public void showList(List<Syn> list)
     {
         adapter.setList(list);
     }
@@ -141,28 +173,35 @@ public class TranslateFragment extends Fragment implements TranslateView
         binding.etTranslateText.setText(originalText);
     }
 
-    public void onClearClicked(View view)
+    @Override
+    public void onClick(View v)
     {
-        binding.etTranslateText.getText().clear();
-        binding.llTranslateResult.setVisibility(View.INVISIBLE);
-    }
-
-    public void onChangeLanguageClicked(View view)
-    {
-        switch (view.getId())
+        switch (v.getId())
         {
+            case R.id.btnClearTranslateText:
+                presenter.clearLookupResponse();
+                binding.etTranslateText.getText().clear();
+                binding.rlTranslateResult.setVisibility(View.INVISIBLE);
+                binding.btnFavorite.setImageDrawable(getResources().getDrawable(android.R.drawable.star_big_off));
+                break;
             case R.id.btnTranslateFrom:
                 isTranslateFromDialogOpened = true;
+                changeLanguageDialog.show();
                 break;
             case R.id.btnTranslateTo:
                 isTranslateFromDialogOpened = false;
+                changeLanguageDialog.show();
+                break;
+            case R.id.btnSwapLanguages:
+                swapLanguages();
+                break;
+            case R.id.btnFavorite:
+                updateTranslateFavorite();
                 break;
         }
-
-        changeLanguageDialog.show();
     }
 
-    public void onSwapLanguagesClicked(View view)
+    private void swapLanguages()
     {
         Button btnTranslateFrom = binding.btnTranslateFrom;
         Button btnTranslateTo = binding.btnTranslateTo;
@@ -180,14 +219,37 @@ public class TranslateFragment extends Fragment implements TranslateView
         btnTranslateTo.setText(translateTo);
     }
 
-    public void onTranslateFavoriteClicked(View view)
+    private void updateTranslateFavorite()
     {
-        ImageButton imageButton = (ImageButton) view;
-        boolean isFavorite = imageButton.getDrawable().equals(getResources().getDrawable(android.R.drawable.star_big_on));
+        boolean isFavorite = binding.btnFavorite.getDrawable().getConstantState().equals(getResources().getDrawable(android.R.drawable.star_big_on).getConstantState());
         boolean isNeedFavorite = !isFavorite;
 
         setTranslateFavorite(isNeedFavorite);
         presenter.setTranslateFavorite(isNeedFavorite);
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+    {
+        if (actionId == EditorInfo.IME_ACTION_SEARCH)
+        {
+            presenter.onSearchButtonClick();
+            hideSoftKeyboard();
+        }
+
+        return actionId == EditorInfo.IME_ACTION_SEARCH;
+    }
+
+    private void hideSoftKeyboard()
+    {
+        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+
+        inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+    }
+
+    public void setLookupResponseById(int lookupResponseId)
+    {
+        this.lookupResponseId = lookupResponseId;
     }
 
 }

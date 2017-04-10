@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="ru.pascalman.translate.view.TranslateFragment">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/activity_vertical_margin">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -21,23 +18,20 @@
                 android:background="@android:color/transparent"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onChangeLanguageClicked" />
+                android:layout_height="wrap_content" />
 
             <Button
                 android:id="@+id/btnSwapLanguages"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="onSwapLanguagesClicked"
-                android:text="Swap" />
+                android:text="@string/swap" />
 
             <Button
                 android:id="@+id/btnTranslateTo"
                 android:background="@android:color/transparent"
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onChangeLanguageClicked" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
@@ -50,11 +44,11 @@
                 android:id="@+id/etTranslateText"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
-                android:inputType="textMultiLine"
                 android:imeOptions="actionSearch"
                 android:paddingRight="36dp"
                 android:gravity="top|left"
-                android:hint="Input text to Translate" />
+                android:hint="@string/input_text_for_translate"
+                android:inputType="text" />
 
             <ImageButton
                 android:id="@+id/btnClearTranslateText"
@@ -62,51 +56,67 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
-                android:onClick="onClearClicked"
                 android:background="@android:color/transparent"
                 android:src="@android:drawable/ic_menu_close_clear_cancel" />
 
         </RelativeLayout>
 
-        <LinearLayout
-            android:id="@+id/llTranslateResult"
+        <RelativeLayout
+            android:id="@+id/rlTranslateResult"
             android:visibility="gone"
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/tvTranslatedText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/tvPos"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <RelativeLayout
+            <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/rvTranslates"
+                <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="wrap_content">
 
-                <ImageButton
-                    android:id="@+id/btnFavorite"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentTop="true"
-                    android:background="@android:color/transparent"
-                    android:src="@android:drawable/star_big_off"
-                    android:onClick="onTranslateFavoriteClicked" />
+                    <TextView
+                        android:id="@+id/tvTranslatedText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
 
-            </RelativeLayout>
+                    <TextView
+                        android:id="@+id/tvPos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
 
-        </LinearLayout>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rvTranslates"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <TextView
+                        android:text="@string/yandexTranslate"
+                        android:autoLink="web"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:text="@string/yandexDictionary"
+                        android:autoLink="web"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+            </ScrollView>
+
+            <ImageButton
+                android:id="@+id/btnFavorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/star_big_off" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 

@@ -2,5 +2,9 @@
 
     <string name="app_name">Translate</string>
     <string name="dot">.</string>
+    <string name="swap">Swap</string>
+    <string name="input_text_for_translate">Input text for Translate</string>
+    <string name="yandexTranslate">Переведено сервисом «Яндекс Переводчик» - http://translate.yandex.ru/</string>
+    <string name="yandexDictionary">Реализовано с помощью сервиса «Яндекс Словарь» - https://tech.yandex.ru/dictionary/</string>
 
 </resources>

@@ -8,8 +8,9 @@ import android.view.ViewGroup;
 
 import ru.pascalman.translate.R;
 import ru.pascalman.translate.databinding.SynListItemBinding;
+import ru.pascalman.translate.presenter.Syn;
 
-public class SynAdapter extends BaseAdapter<String, SynAdapter.SynViewHolder>
+public class SynAdapter extends BaseAdapter<Syn, SynAdapter.SynViewHolder>
 {
 
     public SynAdapter()
@@ -30,9 +31,9 @@ public class SynAdapter extends BaseAdapter<String, SynAdapter.SynViewHolder>
     @Override
     public void onBindViewHolder(SynViewHolder viewHolder, int i)
     {
-        String text = list.get(i);
+        Syn syn = list.get(i);
 
-        viewHolder.setItem(i, text);
+        viewHolder.setSyn(i + 1, syn);
     }
 
     public class SynViewHolder extends RecyclerView.ViewHolder
@@ -47,10 +48,10 @@ public class SynAdapter extends BaseAdapter<String, SynAdapter.SynViewHolder>
             this.binding = binding;
         }
 
-        public void setItem(int index, String text)
+        public void setSyn(int index, Syn syn)
         {
-            binding.setText(text);
-            binding.setIndex(index);
+            binding.setIndex(String.valueOf(index));
+            binding.setSyn(syn);
         }
 
     }

@@ -1,14 +1,14 @@
 package ru.pascalman.translate;
 
-import android.app.ActionBar;
-import android.app.FragmentTransaction;
 import android.databinding.DataBindingUtil;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 
 import io.realm.Realm;
 
@@ -16,7 +16,7 @@ import ru.pascalman.translate.databinding.MainBinding;
 import ru.pascalman.translate.view.ListWithFindFragment;
 import ru.pascalman.translate.view.TranslateFragment;
 
-public class MainActivity extends FragmentActivity implements ActionBar.TabListener
+public class MainActivity extends AppCompatActivity implements ActionBar.TabListener
 {
 
     private MainBinding binding;
@@ -31,7 +31,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         Realm.init(this);
 
         binding = DataBindingUtil.setContentView(this, R.layout.main);
-        actionBar = getActionBar();
+        actionBar = getSupportActionBar();
         appSectionsPagerAdapter = new AppSectionsPagerAdapter(getSupportFragmentManager());
 
         ViewPager vpContent = binding.vpContent;
@@ -72,7 +72,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     public void openTranslationWithResponseId(int id)
     {
-        appSectionsPagerAdapter.setLookupResponseId(id);
+        appSectionsPagerAdapter.setLookupResponseById(id);
         actionBar.setSelectedNavigationItem(0);
     }
 
@@ -80,7 +80,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     {
 
         private String[] pageTitles;
-        private int lookupResponseId = -1;
+        private TranslateFragment translateFragment;
 
         public AppSectionsPagerAdapter(FragmentManager fm)
         {
@@ -90,33 +90,27 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         }
 
         @Override
-        public Fragment getItem(int i)
+        public Fragment getItem(int position)
         {
-            switch (i)
+            Fragment fragment;
+
+            switch (position)
             {
                 case 0:
-                    Fragment fragment = new TranslateFragment();
-                    Bundle args = new Bundle();
-
-                    if (lookupResponseId > -1)
-                    {
-                        args.putInt("lookupResponseId", lookupResponseId);
-
-                        lookupResponseId = -1;
-                    }
-
-                    fragment.setArguments(args);
-
-                    return fragment;
+                    translateFragment = new TranslateFragment();
+                    fragment = translateFragment;
+                    break;
                 default:
                     fragment = new ListWithFindFragment();
-                    args = new Bundle();
 
-                    args.putBoolean("isOnlyFavorite", i == 1);
+                    Bundle args = new Bundle();
+
+                    args.putBoolean("isOnlyFavorite", position == 1);
                     fragment.setArguments(args);
-
-                    return fragment;
+                    break;
             }
+
+            return fragment;
         }
 
         @Override
@@ -131,9 +125,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             return pageTitles[position];
         }
 
-        public void setLookupResponseId(int lookupResponseId)
+        public void setLookupResponseById(int lookupResponseId)
         {
-            this.lookupResponseId = lookupResponseId;
+            translateFragment.setLookupResponseById(lookupResponseId);
         }
 
     }

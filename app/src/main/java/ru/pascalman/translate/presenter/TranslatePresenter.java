@@ -1,9 +1,6 @@
 package ru.pascalman.translate.presenter;
 
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +17,7 @@ import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
 
-public class TranslatePresenter extends BasePresenter implements TextView.OnEditorActionListener
+public class TranslatePresenter extends BasePresenter
 {
 
     private TranslateView view;
@@ -31,7 +28,6 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
     private String translateFrom;
     private String translateTo;
     private LookupResponse lastLookupResponse;
-    private int lookupResposeIdForShow = -1;
 
     public TranslatePresenter(TranslateView view)
     {
@@ -68,15 +64,10 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
 
                     view.initLanguages(new ArrayList<>(languages.getLangs().values()));
 
-                    if (lookupResposeIdForShow > -1)
-                        showLookupResponseById(lookupResposeIdForShow);
-                    else
-                    {
-                        String[] defaultLanguages = getDefaultLanguages();
+                    String[] defaultLanguages = getDefaultLanguages();
 
-                        translateFrom = defaultLanguages[0];
-                        translateTo = defaultLanguages[1];
-                    }
+                    translateFrom = defaultLanguages[0];
+                    translateTo = defaultLanguages[1];
 
                     view.setChoiceLanguages(translateFrom, translateTo);
                 }
@@ -84,20 +75,6 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
             });
 
         addSubscription(subscription);
-    }
-
-    private void showLookupResponseById(int id)
-    {
-        Realm realm = Realm.getDefaultInstance();
-
-        lastLookupResponse = realm.where(LookupResponse.class).equalTo("id", id).findFirst();
-        translateFrom = languages.getLangs().get(lastLookupResponse.getTranslateDirection().substring(0, 1));
-        translateTo = languages.getLangs().get(lastLookupResponse.getTranslateDirection().substring(3, 4));
-
-        view.showOriginalText(lastLookupResponse.getOriginalText());
-        view.showTranslatedText(lastLookupResponse.getText(), lastLookupResponse.getPos());
-        view.setTranslateFavorite(lastLookupResponse.isFavorite());
-        view.showList(lastLookupResponse.getSyns());
     }
 
     private String[] getDefaultLanguages()
@@ -111,16 +88,7 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
         return defaultLanguages;
     }
 
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
-    {
-        if (actionId == EditorInfo.IME_ACTION_SEARCH)
-            onSearchButtonClick();
-
-        return actionId == EditorInfo.IME_ACTION_SEARCH;
-    }
-
-    private void onSearchButtonClick()
+    public void onSearchButtonClick()
     {
         String translateText = view.getTranslateText();
 
@@ -132,45 +100,23 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
 
     public void setTranslateFrom(String translateFrom)
     {
-        String translateFromClean = getLangAcronimByFullName(translateFrom);
-
-        if (isAllowTranslateDirection(translateFromClean, translateTo))
-            this.translateFrom = translateFrom;
-        else
-            view.showError("Doesn't allow translate direction");
-    }
-
-    private String getLangAcronimByFullName(String fullName)
-    {
-        String langAcronim = "";
-        Map<String, String> langs = languages.getLangs();
-
-        for (String key : langs.keySet())
-            if (langs.get(key).equals(fullName))
-                langAcronim = key;
-
-        return langAcronim;
-    }
-
-    private boolean isAllowTranslateDirection(String translateFrom, String translateTo)
-    {
-        String translateDirection = translateFrom + "-" + translateTo;
-
-        return languages.getDirs().contains(translateDirection);
+        this.translateFrom = translateFrom;
     }
 
     public void setTranslateTo(String translateTo)
     {
-        String translateToClean = getLangAcronimByFullName(translateTo);
-
-        if (isAllowTranslateDirection(translateFrom, translateToClean))
-            this.translateTo = translateTo;
-        else
-            view.showError("Doesn't allow translate direction");
+        this.translateTo = translateTo;
     }
 
     private void translate(String translateText)
     {
+        if (!isAllowTranslateDirection(translateFrom, translateTo))
+        {
+            view.showError("Doesn't allow translate direction");
+
+            return;
+        }
+
         String translateDirection = getTranslateDirection();
         Subscription translateSubscription = translateModel.translate(translateDirection, translateText)
                 .map(translateResponseMapper)
@@ -203,9 +149,33 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
         addSubscription(translateSubscription);
     }
 
+    private boolean isAllowTranslateDirection(String translateFrom, String translateTo)
+    {
+        String translateFromClean = getLangAcronimByFullName(translateFrom);
+        String translateToClean = getLangAcronimByFullName(translateTo);
+        String translateDirection = translateFromClean + "-" + translateToClean;
+
+        return languages.getDirs().contains(translateDirection);
+    }
+
+    private String getLangAcronimByFullName(String fullName)
+    {
+        String langAcronim = "";
+        Map<String, String> langs = languages.getLangs();
+
+        for (String key : langs.keySet())
+            if (langs.get(key).equals(fullName))
+                langAcronim = key;
+
+        return langAcronim;
+    }
+
     private String getTranslateDirection()
     {
-        return translateFrom + "-" + translateTo;
+        String translateFromClean = getLangAcronimByFullName(translateFrom);
+        String translateToClean = getLangAcronimByFullName(translateTo);
+
+        return translateFromClean + "-" + translateToClean;
     }
 
     private void lookup(String translateText, String translateDirection, String translatedText)
@@ -229,13 +199,20 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
                     public void onNext(LookupResponse lookupResponse)
                     {
                         Realm realm = Realm.getDefaultInstance();
-                        int lastId = realm.where(LookupResponse.class).max("id").intValue() + 1;
+                        Number lastId = realm.where(LookupResponse.class).max("id");
+                        int nextId = lastId == null ? 0 : lastId.intValue() + 1;
 
-                        lookupResponse.setId(lastId);
+                        lookupResponse.setId(nextId);
                         lookupResponse.setOriginalText(translateText);
+                        lookupResponse.setTranslateFrom(translateFrom);
+                        lookupResponse.setTranslateTo(translateTo);
                         lookupResponse.setTranslateDirection(translateDirection);
 
+                        realm.beginTransaction();
+
                         lastLookupResponse = realm.copyToRealm(lookupResponse);
+
+                        realm.commitTransaction();
 
                         view.showTranslatedText(lookupResponse.getText(), lookupResponse.getPos());
                         view.showList(lookupResponse.getSyns());
@@ -248,20 +225,44 @@ public class TranslatePresenter extends BasePresenter implements TextView.OnEdit
 
     private String getDictionaryDirection()
     {
-        return translateTo + "-" + translateTo;
+        String translateToClean = getLangAcronimByFullName(translateTo);
+
+        return translateToClean + "-" + translateToClean;
     }
 
     public void setTranslateFavorite(boolean isFavorite)
     {
+        Realm realm = Realm.getDefaultInstance();
+
+        realm.beginTransaction();
         lastLookupResponse.setFavorite(isFavorite);
+        realm.commitTransaction();
     }
 
-    public void openLookupResponseById(int id)
+    public void updateTranslateFavorite()
     {
-        if (languages != null)
-            showLookupResponseById(id);
-        else
-            lookupResposeIdForShow = id;
+        if (lastLookupResponse != null)
+            view.setTranslateFavorite(lastLookupResponse.isFavorite());
+    }
+
+    public void clearLookupResponse()
+    {
+        lastLookupResponse = null;
+    }
+
+    public void showLookupResponseById(int id)
+    {
+        Realm realm = Realm.getDefaultInstance();
+
+        lastLookupResponse = realm.where(LookupResponse.class).equalTo("id", id).findFirst();
+        translateFrom = lastLookupResponse.getTranslateFrom();
+        translateTo = lastLookupResponse.getTranslateTo();
+
+        view.setChoiceLanguages(translateFrom, translateTo);
+        view.showOriginalText(lastLookupResponse.getOriginalText());
+        view.showTranslatedText(lastLookupResponse.getText(), lastLookupResponse.getPos());
+        view.setTranslateFavorite(lastLookupResponse.isFavorite());
+        view.showList(lastLookupResponse.getSyns());
     }
 
     @Override
