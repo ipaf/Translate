@@ -151,29 +151,29 @@ public class TranslatePresenter extends BasePresenter
 
     private boolean isAllowTranslateDirection(String translateFrom, String translateTo)
     {
-        String translateFromClean = getLangAcronimByFullName(translateFrom);
-        String translateToClean = getLangAcronimByFullName(translateTo);
+        String translateFromClean = getLangAcronymByFullName(translateFrom);
+        String translateToClean = getLangAcronymByFullName(translateTo);
         String translateDirection = translateFromClean + "-" + translateToClean;
 
         return languages.getDirs().contains(translateDirection);
     }
 
-    private String getLangAcronimByFullName(String fullName)
+    private String getLangAcronymByFullName(String fullName)
     {
-        String langAcronim = "";
+        String langAcronym = "";
         Map<String, String> langs = languages.getLangs();
 
         for (String key : langs.keySet())
             if (langs.get(key).equals(fullName))
-                langAcronim = key;
+                langAcronym = key;
 
-        return langAcronim;
+        return langAcronym;
     }
 
     private String getTranslateDirection()
     {
-        String translateFromClean = getLangAcronimByFullName(translateFrom);
-        String translateToClean = getLangAcronimByFullName(translateTo);
+        String translateFromClean = getLangAcronymByFullName(translateFrom);
+        String translateToClean = getLangAcronymByFullName(translateTo);
 
         return translateFromClean + "-" + translateToClean;
     }
@@ -225,7 +225,7 @@ public class TranslatePresenter extends BasePresenter
 
     private String getDictionaryDirection()
     {
-        String translateToClean = getLangAcronimByFullName(translateTo);
+        String translateToClean = getLangAcronymByFullName(translateTo);
 
         return translateToClean + "-" + translateToClean;
     }
